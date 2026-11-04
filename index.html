@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080d18">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Radio FM">
+  <meta name="description" content="Sintoniza tu emisora.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>FM Radio</title>
+  <style>
+    :root{color-scheme:dark;--bg:#080d18;--panel:#101a2b;--muted:#8190a8;--cyan:#69e6e1;--white:#f3f7ff}
+    *{box-sizing:border-box} body{margin:0;min-height:100svh;background:radial-gradient(ellipse at 50% 0%,#172a42 0%,#0b1220 42%,#060a12 100%);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--white);display:flex;justify-content:center;align-items:center;padding:22px 16px}
+    .app{width:min(100%,430px);min-height:min(850px,calc(100svh - 32px));border:1px solid #26354c;border-radius:34px;background:linear-gradient(160deg,rgba(21,34,53,.97),rgba(8,14,25,.99));box-shadow:0 30px 90px #0009,inset 0 1px #ffffff12;padding:25px 22px 22px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+    .top{display:flex;justify-content:space-between;align-items:center;color:#a8b7cc;font-size:11px;letter-spacing:2.4px;font-weight:800}
+    .led{width:7px;height:7px;border-radius:50%;background:#53647b;display:inline-block;margin-right:7px;box-shadow:0 0 0 4px #ffffff08}
+    .brand{text-align:center;margin:35px 0 20px}
+    .brand .eyebrow{font-size:10px;letter-spacing:4px;color:#8798b1;font-weight:800}
+    h1{font-size:24px;letter-spacing:5px;margin:9px 0 0;font-weight:800}
+    .screen{background:linear-gradient(145deg,#07111d,#0d1d2b);border:1px solid #2c4355;border-radius:22px;padding:23px 16px 19px;text-align:center;box-shadow:inset 0 0 28px #0008;position:relative;overflow:hidden}
+    .screen:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 3px,#ffffff04 4px);pointer-events:none}
+    .screen-label{font-size:10px;letter-spacing:3px;color:#8ea4b9;font-weight:800}
+    .frequency{font-variant-numeric:tabular-nums;font-size:clamp(38px,11vw,54px);letter-spacing:1px;font-weight:750;margin:12px 0 5px;line-height:1.1}
+    .unit{font-size:11px;letter-spacing:3px;color:#8ba0b8}
+    .status{height:23px;margin-top:13px;font-size:10px;letter-spacing:2.5px;color:#8ea4b9;font-weight:800}
+    .status.live{color:var(--cyan);text-shadow:0 0 15px #69e6e180}
+    .signal{height:22px;display:flex;justify-content:center;align-items:end;gap:4px;margin-top:5px}
+    .signal i{display:block;width:4px;border-radius:5px;background:#547184;height:5px}
+    .signal i:nth-child(2){height:9px}.signal i:nth-child(3){height:14px}.signal i:nth-child(4){height:18px}.signal i:nth-child(5){height:22px}
+    .signal.good i{background:var(--cyan);box-shadow:0 0 9px #69e6e166}
+    .dial-wrap{margin:30px 0 10px}
+    .dial-head{display:flex;justify-content:space-between;color:#8190a8;font-size:10px;letter-spacing:1.5px;margin-bottom:13px}
+    input[type=range]{width:100%;appearance:none;background:linear-gradient(90deg,#31465a,#75d8d2,#31465a);height:4px;border-radius:8px;outline:none}
+    input[type=range]::-webkit-slider-thumb{appearance:none;width:25px;height:25px;border-radius:50%;background:linear-gradient(145deg,#f8ffff,#8ca6b5);border:4px solid #183044;box-shadow:0 2px 12px #000b}
+    input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#d9f3f2;border:4px solid #183044;box-shadow:0 2px 12px #000b}
+    .scale{display:flex;justify-content:space-between;color:#71839b;font-size:9px;margin-top:11px}
+    .controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-top:26px}
+    button{border:1px solid #34475e;background:linear-gradient(180deg,#1b2b40,#111d2e);color:#e9f3ff;border-radius:15px;min-height:54px;font-weight:750;letter-spacing:1px;font-size:11px;box-shadow:0 5px 12px #0003;cursor:pointer;touch-action:manipulation}
+    button:active{transform:scale(.97)}button.primary{border-color:#397a7d;background:linear-gradient(180deg,#1d5359,#153b47);color:#cffffb}
+    button:disabled{opacity:.38;cursor:default}
+    .subcontrols{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:22px;color:#8da0b7;font-size:10px;letter-spacing:1.5px}
+    .volume{display:flex;align-items:center;gap:10px;flex:1}.volume input{max-width:115px}
+    .hint{text-align:center;margin-top:auto;padding-top:25px;color:#71839a;font-size:10px;letter-spacing:1px}
+    .hidden{display:none!important}
+    .found .screen{border-color:#5adbd2;box-shadow:inset 0 0 35px #1a77734a,0 0 28px #45cfc52b}
+    .found .brand h1{color:#bafff8}
+    .found .frequency{font-size:clamp(33px,9vw,45px);color:#bafff8}
+    .found .status{color:#70f4e9}
+    .found .led{background:#65f0d9;box-shadow:0 0 12px #65f0d9}
+    .playing-note{font-size:12px;color:#b4c9d9;margin-top:9px;min-height:18px}
+    .final{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;flex:1;padding:28px 8px}
+    .final .heart{font-size:48px;filter:drop-shadow(0 0 18px #ff789c66)}
+    .final h2{font-size:24px;letter-spacing:3px;margin:22px 0 10px}
+    .final p{color:#b5c3d5;line-height:1.7;font-size:14px;max-width:290px}
+    .final .signature{color:#7fe8df;font-size:11px;letter-spacing:3px;margin-top:18px}
+    .static{position:absolute;inset:0;opacity:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.28'/%3E%3C/svg%3E");mix-blend-mode:screen}
+    .static.on{opacity:.12;animation:flicker .18s infinite}
+    @keyframes flicker{0%,100%{opacity:.05}50%{opacity:.18}}
+    @media(max-height:720px){.app{min-height:0}.brand{margin:20px 0 14px}.dial-wrap{margin-top:22px}.hint{padding-top:17px}}
+  </style>
+</head>
+<body>
+<main class="app" id="app">
+  <div class="top"><span><i class="led" id="led"></i>FM RECEIVER</span><span id="topRight">STEREO</span></div>
+  <header class="brand"><div class="eyebrow">DIGITAL TUNER</div><h1 id="brandTitle">FM RADIO</h1></header>
+  <section id="radio">
+    <div class="screen">
+      <div class="screen-label" id="screenLabel">FREQUENCY</div>
+      <div class="frequency" id="frequency">FM 98.4</div>
+      <div class="unit" id="unit">MHz · STEREO</div>
+      <div class="status" id="status">BUSCANDO EMISORAS</div>
+      <div class="signal" id="signal"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="playing-note" id="playingNote"></div>
+      <div class="static" id="static"></div>
+    </div>
+    <div class="dial-wrap">
+      <div class="dial-head"><span>◂ TUNING</span><span>MANUAL SEEK ▸</span></div>
+      <input id="dial" type="range" min="0" max="1000" value="532" step="1" aria-label="Sintonizador">
+      <div class="scale"><span>87.5</span><span>92.0</span><span>98.0</span><span>104.0</span><span>108.0</span></div>
+    </div>
+    <div class="controls">
+      <button id="down" aria-label="Bajar frecuencia">− TUNE</button>
+      <button class="primary" id="scan">AUTO SCAN</button>
+      <button id="up" aria-label="Subir frecuencia">TUNE +</button>
+    </div>
+    <div class="subcontrols">
+      <div class="volume"><span>VOL</span><input id="volume" type="range" min="0" max="100" value="78" aria-label="Volumen"></div>
+      <button id="playPause" style="min-height:38px;padding:0 15px">Ⅱ PAUSE</button>
+    </div>
+  </section>
+  <section id="final" class="final hidden">
+    <div class="heart">♡</div>
+    <h2>FIN DE TRANSMISIÓN</h2>
+    <p>Hay señales que uno no encuentra por casualidad. Gracias por sintonizar esta.</p>
+    <div class="signature">CON TODO MI CARIÑO · 7.5.25</div>
+  </section>
+  <div class="hint" id="hint">AJUSTA EL DIAL PARA ENCONTRAR TU SEÑAL</div>
+</main>
+<audio id="transmission" preload="auto" src="transmision.mp3"></audio>
+<audio id="song" preload="auto" src="cancion.mp3"></audio>
+<script>
+(() => {
+  const secret = 725, tolerance = 2;
+  const app = document.getElementById('app'), dial = document.getElementById('dial');
+  const frequency = document.getElementById('frequency'), status = document.getElementById('status');
+  const signal = document.getElementById('signal'), staticFx = document.getElementById('static');
+  const brandTitle = document.getElementById('brandTitle'), screenLabel = document.getElementById('screenLabel');
+  const unit = document.getElementById('unit'), hint = document.getElementById('hint');
+  const note = document.getElementById('playingNote'), radio = document.getElementById('radio');
+  const finalScreen = document.getElementById('final'), transmission = document.getElementById('transmission');
+  const song = document.getElementById('song'), volume = document.getElementById('volume');
+  const playPause = document.getElementById('playPause');
+  let stage = 'search', currentAudio = null, scanning = false;
+
+  const stations = [42,116,203,287,365,449,532,618,691,secret,804,887,962];
+  const clamp = n => Math.max(0, Math.min(1000, n));
+  function displayPosition(pos) {
+    if (Math.abs(pos-secret) <= tolerance) {
+      frequency.textContent = 'FM 7.4.25';
+      status.textContent = stage === 'search' ? 'SEÑAL DÉBIL' : '● EN VIVO';
+      signal.classList.add('good');
+      staticFx.classList.remove('on');
+    } else {
+      const mhz = (87.5 + (pos/1000)*20.5).toFixed(1);
+      frequency.textContent = 'FM ' + mhz;
+      status.textContent = stations.includes(pos) ? 'EMISORA DETECTADA' : 'BUSCANDO EMISORAS';
+      signal.classList.remove('good');
+      staticFx.classList.toggle('on', !stations.includes(pos));
+    }
+  }
+  function tune(pos) {
+    if (stage !== 'search') return;
+    pos = clamp(pos);
+    if (Math.abs(pos-secret) <= tolerance) pos = secret;
+    dial.value = pos;
+    displayPosition(pos);
+    if (pos === secret) foundSignal();
+  }
+  async function foundSignal() {
+    if (stage !== 'search') return;
+    stage = 'transmission';
+    app.classList.add('found');
+    dial.disabled = true;
+    document.getElementById('down').disabled = true;
+    document.getElementById('up').disabled = true;
+    document.getElementById('scan').disabled = true;
+    brandTitle.textContent = 'RADIO DEL AMOR';
+    screenLabel.textContent = 'FRECUENCIA ESPECIAL';
+    unit.textContent = '7 · 4 · 25';
+    frequency.textContent = 'FM 7.4.25';
+    status.textContent = '● SEÑAL ENCONTRADA · EN VIVO';
+    signal.classList.add('good');
+    hint.textContent = 'TRANSMISIÓN EN DIRECTO';
+    note.textContent = 'Conectando con la emisora…';
+    currentAudio = transmission;
+    transmission.volume = volume.value / 100;
+    try {
+      await transmission.play();
+      note.textContent = 'TRANSMISIÓN EN CURSO';
+      playPause.textContent = 'Ⅱ PAUSE';
+    } catch(e) {
+      note.textContent = 'Toca reproducir para escuchar la transmisión';
+      playPause.textContent = '▶ PLAY';
+    }
+  }
+  function scanNext() {
+    if (stage !== 'search') return;
+    const pos = Number(dial.value);
+    const next = stations.find(s => s > pos + 4) ?? stations[0];
+    tune(next);
+  }
+  dial.addEventListener('input', e => tune(Number(e.target.value)));
+  document.getElementById('down').addEventListener('click', () => tune(Number(dial.value)-5));
+  document.getElementById('up').addEventListener('click', () => tune(Number(dial.value)+5));
+  document.getElementById('scan').addEventListener('click', scanNext);
+  volume.addEventListener('input', () => {
+    transmission.volume = song.volume = Number(volume.value)/100;
+  });
+  playPause.addEventListener('click', async () => {
+    if (stage === 'search' || stage === 'final') return;
+    if (currentAudio && currentAudio.paused) {
+      try { await currentAudio.play(); playPause.textContent = 'Ⅱ PAUSE'; }
+      catch(e) { note.textContent = 'No se pudo iniciar el audio. Vuelve a tocar PLAY.'; }
+    } else if (currentAudio) {
+      currentAudio.pause(); playPause.textContent = '▶ PLAY';
+    }
+  });
+  transmission.addEventListener('ended', async () => {
+    if (stage !== 'transmission') return;
+    stage = 'song'; currentAudio = song;
+    note.textContent = 'A CONTINUACIÓN · MIL VIDAS';
+    song.volume = volume.value/100;
+    try { await song.play(); playPause.textContent = 'Ⅱ PAUSE'; }
+    catch(e) {
+      note.textContent = 'Toca PLAY para continuar con la canción';
+      playPause.textContent = '▶ PLAY';
+    }
+  });
+  song.addEventListener('ended', () => {
+    stage = 'final';
+    radio.classList.add('hidden');
+    finalScreen.classList.remove('hidden');
+    hint.textContent = 'FIN';
+    playPause.disabled = true;
+  });
+  displayPosition(Number(dial.value));
+})();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>

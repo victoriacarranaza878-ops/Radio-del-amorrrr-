@@ -1,0 +1,28 @@
+RADIO DEL AMOR — VERSIÓN CORREGIDA
+
+IMPORTANTE: Esta versión usa los dos MP3 en la RAÍZ del repositorio para que sea más fácil subirlos desde el teléfono.
+
+ESTRUCTURA EXACTA:
+index.html
+manifest.json
+service-worker.js
+icon-192.png
+icon-512.png
+transmision.mp3
+cancion.mp3
+
+PASOS:
+1. En tu repositorio de GitHub, elimina los archivos antiguos y la carpeta audio si existe (o reemplaza los archivos).
+2. Sube TODOS los archivos de esta carpeta directamente a la raíz del repositorio, donde se ve index.html.
+3. Comprueba que transmision.mp3 y cancion.mp3 aparecen al mismo nivel que index.html. NO los metas en una carpeta.
+4. GitHub > Settings > Pages: Deploy from a branch > main > /(root) > Save.
+5. Espera a que termine el despliegue.
+6. Abre la página en Chrome y haz una recarga completa. Si sigue mostrando la versión vieja, borra los datos del sitio o abre en una pestaña de incógnito.
+
+PRUEBAS DIRECTAS:
+https://TU-USUARIO.github.io/TU-REPOSITORIO/transmision.mp3
+https://TU-USUARIO.github.io/TU-REPOSITORIO/cancion.mp3
+
+La frecuencia secreta de esta versión es FM 7.4.25.
+La app bloquea el dial durante la transmisión para evitar saltos accidentales.
+Si el navegador bloquea el inicio automático de la canción al terminar la voz, toca PLAY.
